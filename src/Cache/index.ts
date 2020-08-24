@@ -10,7 +10,7 @@
 import { join } from 'path'
 import revHash from 'rev-hash'
 import { readFileSync, outputFileSync, removeSync } from 'fs-extra'
-import { getCachePathForFile } from '../utils'
+import { getCachePathForFile, debug } from '../utils'
 
 /**
  * Exposes the API to write file parsed contents to disk as cache. Handles
@@ -42,7 +42,9 @@ export class Cache {
 	 */
 	public get(cachePath: string): string | null {
 		try {
-			return readFileSync(cachePath, 'utf8')
+			const contents = readFileSync(cachePath, 'utf8')
+			debug('reading from cache "%s"', cachePath)
+			return contents
 		} catch (error) {
 			if (error.code === 'ENOENT') {
 				return null
@@ -55,6 +57,7 @@ export class Cache {
 	 * Writes file contents to the disk
 	 */
 	public set(cachePath: string, contents: string) {
+		debug('writing to cache "%s"', cachePath)
 		outputFileSync(cachePath, contents)
 	}
 
@@ -62,6 +65,7 @@ export class Cache {
 	 * Clears all the generate cache for a given file
 	 */
 	public clearForFile(filePath: string) {
+		debug('clear cache for "%s"', filePath)
 		const relativeCachePath = getCachePathForFile(this.appRoot, filePath)
 		removeSync(join(this.cacheRoot, relativeCachePath))
 	}

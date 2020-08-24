@@ -8,6 +8,9 @@
  */
 
 import normalizePath from 'normalize-path'
+import Debug from 'debug'
+
+export const debug = Debug('adonis:require-ts')
 
 /**
  * Returns the cache directory path for a given file. The idea is to

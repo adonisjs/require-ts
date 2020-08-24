@@ -11,6 +11,7 @@ import { join } from 'path'
 import tsStatic from 'typescript'
 import { readFileSync } from 'fs-extra'
 
+import { debug } from '../utils'
 import { Cache, FakeCache } from '../Cache'
 import { DiagnosticsReporter } from '../DiagnosticsReporter'
 
@@ -48,6 +49,7 @@ export class Config {
 	 * file.
 	 */
 	private getConfigRawContents(): string {
+		debug('checking for tsconfig "%s"', this.configFilePath)
 		try {
 			return readFileSync(this.configFilePath, 'utf-8')
 		} catch (error) {
@@ -66,6 +68,7 @@ export class Config {
 	 */
 	private parseTsConfig(): { error: null | tsStatic.Diagnostic[]; options: any } {
 		let exception: any = null
+		debug('parse tsconfig file')
 
 		/**
 		 * Parse config using typescript compiler

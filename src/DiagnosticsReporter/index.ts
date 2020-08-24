@@ -9,6 +9,9 @@
 
 import tsStatic from 'typescript'
 
+/**
+ * Exposes the API to report/print typescript diagnostic reports
+ */
 export class DiagnosticsReporter {
 	/**
 	 * Diagnostics host

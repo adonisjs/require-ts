@@ -10,6 +10,7 @@
 import tsStatic from 'typescript'
 import sourceMapSupport from 'source-map-support'
 
+import { debug } from '../utils'
 import { Cache, FakeCache } from '../Cache'
 import { DiagnosticsReporter } from '../DiagnosticsReporter'
 
@@ -83,6 +84,7 @@ export class Compiler {
 		sourceMapSupport.install({
 			environment: 'node',
 			retrieveFile: (pathOrUrl: string) => {
+				debug('reading source for "%s"', pathOrUrl)
 				return this.memCache.get(pathOrUrl) || ''
 			},
 		})
@@ -92,6 +94,7 @@ export class Compiler {
 	 * Compiles the file using the typescript compiler
 	 */
 	private compileFile(filePath: string, contents: string) {
+		debug('compiling file using typescript "%s"', filePath)
 		let { outputText, diagnostics } = this.ts.transpileModule(contents, {
 			fileName: filePath,
 			compilerOptions: this.compilerOptions,
@@ -100,7 +103,6 @@ export class Compiler {
 
 		/**
 		 * Report diagnostics if any
-		 * @param {[type]} diagnostics [description]
 		 */
 		if (diagnostics) {
 			this.diagnosticsReporter.report(diagnostics)
@@ -117,6 +119,7 @@ export class Compiler {
 	 * Compile typescript source code using the tsc compiler.
 	 */
 	public compile(filePath: string, contents: string) {
+		debug('compiling file "%s"', filePath)
 		const cachePath = this.cache.makeCachePath(filePath, contents, '.js')
 
 		/**
