@@ -27,7 +27,9 @@ test.group('Compiler', (group) => {
 		const cwd = join(__dirname, '..')
 		const cacheRoot = join(fs.basePath, 'cache')
 
-		const compiler = new Compiler(cwd, cacheRoot, ts, {})
+		const compiler = new Compiler(cwd, cacheRoot, ts, {
+			compilerOptions: {},
+		})
 		const output = compiler.compile(
 			'server.ts',
 			`
@@ -54,7 +56,9 @@ test.group('Compiler', (group) => {
 		`
 
 		const fileHash = revHash(contents)
-		const compiler = new Compiler(cwd, cacheRoot, ts, {})
+		const compiler = new Compiler(cwd, cacheRoot, ts, {
+			compilerOptions: {},
+		})
 		const output = compiler.compile('server.ts', contents)
 
 		const cachedContents = await fs.get(`cache/server/${fileHash}.js`)
@@ -72,7 +76,9 @@ test.group('Compiler', (group) => {
 		const fileHash = revHash(contents)
 		await fs.add(`cache/server/${fileHash}.js`, 'hello')
 
-		const compiler = new Compiler(cwd, cacheRoot, ts, {})
+		const compiler = new Compiler(cwd, cacheRoot, ts, {
+			compilerOptions: {},
+		})
 		const output = compiler.compile('server.ts', contents)
 
 		assert.deepEqual(stringToArray(output), stringToArray('hello'))
@@ -87,7 +93,15 @@ test.group('Compiler', (group) => {
 		`
 
 		const fileHash = revHash(contents)
-		const compiler = new Compiler(cacheRoot, cwd, ts, {}, false)
+		const compiler = new Compiler(
+			cacheRoot,
+			cwd,
+			ts,
+			{
+				compilerOptions: {},
+			},
+			false
+		)
 		const output = compiler.compile('server.ts', contents)
 
 		const hasCacheFile = await fs.exists(`cache/server/${fileHash}.js`)
@@ -99,6 +113,54 @@ test.group('Compiler', (group) => {
 			Object.defineProperty(exports, "__esModule", { value: true });
 			var name = 'hello';
 			exports.default = name;`)
+		)
+	})
+
+	test('apply transformers', async (assert) => {
+		const cwd = join(__dirname, '..')
+		const cacheRoot = join(fs.basePath, 'cache')
+
+		await fs.add(
+			'transformer.js',
+			`
+			module.exports = function (ts, appRoot) {
+				return (ctx) => {
+					 return (sourceFile) => {
+					 	function visitor (node) {
+					 		if (
+			          ts.isCallExpression(node)
+			          && node.expression
+			          && ts.isIdentifier(node.expression)
+			          && node.expression.escapedText === 'require'
+			        ) {
+			        	return ts.createCall(
+		              ts.createIdentifier('require'),
+		              undefined,
+		              [ts.createStringLiteral(\`\${appRoot}\`)],
+		            )
+			        }
+							return ts.visitEachChild(node, visitor, ctx)
+						}
+						return ts.visitEachChild(sourceFile, visitor, ctx)
+					}
+				}
+			}
+		`
+		)
+
+		const compiler = new Compiler(cwd, cacheRoot, ts, {
+			compilerOptions: {},
+			transformers: {
+				after: [{ transform: join(fs.basePath, 'transformer.js') }],
+			},
+		})
+
+		const output = compiler.compile('server.ts', `import'foo'`)
+		assert.deepEqual(
+			stringToArray(output).slice(0, -1),
+			stringToArray(`"use strict";
+			Object.defineProperty(exports, "__esModule", { value: true });
+			require("${cwd}");`)
 		)
 	})
 })

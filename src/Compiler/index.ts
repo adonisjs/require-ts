@@ -12,6 +12,7 @@ import sourceMapSupport from 'source-map-support'
 
 import { debug } from '../utils'
 import { Cache, FakeCache } from '../Cache'
+import { Transformers } from '../Contracts'
 import { DiagnosticsReporter } from '../DiagnosticsReporter'
 
 /**
@@ -34,15 +35,21 @@ export class Compiler {
 	 */
 	private diagnosticsReporter = new DiagnosticsReporter(this.appRoot, this.ts, false)
 
+	private transformers: tsStatic.CustomTransformers = {}
+
 	constructor(
 		private appRoot: string,
 		private cacheRoot: string,
 		private ts: typeof tsStatic,
-		private compilerOptions: tsStatic.CompilerOptions,
+		private options: {
+			compilerOptions: tsStatic.CompilerOptions
+			transformers?: Transformers
+		},
 		private usesCache: boolean = true
 	) {
 		this.patchCompilerOptions()
 		this.setupSourceMaps()
+		this.resolveTransformers()
 	}
 
 	/**
@@ -53,12 +60,12 @@ export class Compiler {
 		 * Force inline source maps. We need this to avoid manual
 		 * lookups
 		 */
-		this.compilerOptions.inlineSourceMap = true
+		this.options.compilerOptions.inlineSourceMap = true
 
 		/**
 		 * Inline sources
 		 */
-		this.compilerOptions.inlineSources = true
+		this.options.compilerOptions.inlineSources = true
 
 		/**
 		 * Remove "outDir" property, so that the source maps paths are generated
@@ -69,12 +76,61 @@ export class Compiler {
 		 * of project root will corrupt the absolute path names inside the
 		 * source maps.
 		 */
-		delete this.compilerOptions.outDir
+		delete this.options.compilerOptions.outDir
 
 		/**
 		 * Inline source maps and source map cannot be used together
 		 */
-		delete this.compilerOptions.sourceMap
+		delete this.options.compilerOptions.sourceMap
+	}
+
+	/**
+	 * Resolves transformer relative from the app root
+	 */
+	private resolverTransformer(transformer: string) {
+		try {
+			const value = require(require.resolve(transformer, { paths: [this.appRoot] }))
+			if (typeof value !== 'function') {
+				throw new Error('Transformer module must export a function')
+			}
+			return value(this.ts, this.appRoot)
+		} catch (error) {
+			if (error.code === 'ENOENT') {
+				throw new Error(
+					`Unable to resolve transformer "${transformer}" specified in tsconfig.json file`
+				)
+			}
+			throw error
+		}
+	}
+
+	/**
+	 * Resolve transformers
+	 */
+	private resolveTransformers() {
+		if (!this.options.transformers) {
+			return
+		}
+
+		if (this.options.transformers.before) {
+			this.transformers.before = this.options.transformers.before.map((transformer) => {
+				return this.resolverTransformer(transformer.transform)
+			})
+		}
+
+		if (this.options.transformers.after) {
+			this.transformers.after = this.options.transformers.after.map((transformer) => {
+				return this.resolverTransformer(transformer.transform)
+			})
+		}
+
+		if (this.options.transformers.afterDeclarations) {
+			this.transformers.afterDeclarations = this.options.transformers.afterDeclarations.map(
+				(transformer) => {
+					return this.resolverTransformer(transformer.transform)
+				}
+			)
+		}
 	}
 
 	/**
@@ -97,8 +153,9 @@ export class Compiler {
 		debug('compiling file using typescript "%s"', filePath)
 		let { outputText, diagnostics } = this.ts.transpileModule(contents, {
 			fileName: filePath,
-			compilerOptions: this.compilerOptions,
+			compilerOptions: this.options.compilerOptions,
 			reportDiagnostics: true,
+			transformers: this.transformers,
 		})
 
 		/**

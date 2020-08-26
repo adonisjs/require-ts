@@ -12,17 +12,9 @@ import tsStatic from 'typescript'
 import { readFileSync } from 'fs-extra'
 
 import { debug } from '../utils'
+import { Transformers } from '../Contracts'
 import { Cache, FakeCache } from '../Cache'
 import { DiagnosticsReporter } from '../DiagnosticsReporter'
-
-/**
- * Custom transformers extracted from the package.json file
- */
-type Transformers = {
-	before?: { transform: string }[],
-	after?: { transform: string }[],
-	afterDeclarations?: { transform: string }[],
-}
 
 /**
  * Exposes the API to parse tsconfig file and cache it until the
@@ -155,31 +147,46 @@ export class Config {
 	}
 
 	/**
+	 * Returns the config file from the cache or returns null when there is
+	 * no cache
+	 */
+	public getCached(): {
+		raw: string
+		cachePath: string
+		cached: null | {
+			version: string
+			compilerOptions: tsStatic.CompilerOptions
+			transformers?: Transformers
+		}
+	} {
+		const rawContents = this.getConfigRawContents()
+		const cachePath = this.cache.makeCachePath(this.configFilePath, rawContents, '.json')
+		return {
+			raw: rawContents,
+			cachePath,
+			cached: this.parseConfigAsJson(this.cache.get(cachePath)),
+		}
+	}
+
+	/**
 	 * Parses config and returns the compiler options
 	 */
 	public parse(): {
-		version: string,
-		options: null | { compilerOptions: tsStatic.CompilerOptions, transformers?: Transformers }
+		version: string
+		options: null | { compilerOptions: tsStatic.CompilerOptions; transformers?: Transformers }
 		error: null | tsStatic.Diagnostic[]
 	} {
-		const rawContents = this.getConfigRawContents()
-		const cachePath = this.cache.makeCachePath(
-			this.configFilePath,
-			rawContents,
-			'.json'
-		)
-
 		/**
 		 * Cache exists and is upto date
 		 */
-		const cached = this.parseConfigAsJson(this.cache.get(cachePath))
-		if (cached) {
+		const { cached, raw, cachePath } = this.getCached()
+		if (cached && cached.version === Config.version) {
 			return {
 				version: cached.version,
 				error: null,
 				options: {
 					compilerOptions: cached.compilerOptions,
-					transformers: cached.transformers
+					transformers: cached.transformers,
 				},
 			}
 		}
@@ -206,7 +213,7 @@ export class Config {
 			error: null,
 			options: {
 				compilerOptions: config.options,
-				transformers: this.extractTransformers(rawContents)
+				transformers: this.extractTransformers(raw),
 			},
 		}
 	}

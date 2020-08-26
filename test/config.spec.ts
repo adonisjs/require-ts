@@ -25,12 +25,11 @@ test.group('Config', (group) => {
 	test('parse tsconfig and return compiler options back', async (assert) => {
 		const cwd = fs.basePath
 		const cacheRoot = join(fs.basePath, 'cache')
-		await fs.add(
-			'tsconfig.json',
-			JSON.stringify({
-				extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
-			})
-		)
+		const contents = JSON.stringify({
+			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
+		})
+
+		await fs.add('tsconfig.json', contents)
 
 		const config = new Config(cwd, cacheRoot, ts)
 		const options = config.parse()
@@ -44,40 +43,40 @@ test.group('Config', (group) => {
 	test('write compiled file to cache', async (assert) => {
 		const cwd = fs.basePath
 		const cacheRoot = join(fs.basePath, 'cache')
-
-		const tsConfigContents = JSON.stringify({
+		const contents = JSON.stringify({
 			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
 		})
-		await fs.add('tsconfig.json', tsConfigContents)
+
+		await fs.add('tsconfig.json', contents)
 
 		const config = new Config(cwd, cacheRoot, ts)
 		const options = config.parse()
 
-		const hasCacheFile = await fs.exists(`cache/tsconfig/${revisionHash(tsConfigContents)}.json`)
+		const hasCacheFile = await fs.exists(`cache/tsconfig/${revisionHash(contents)}.json`)
+		assert.isTrue(hasCacheFile)
 
 		assert.isNull(options.error)
-		assert.isTrue(hasCacheFile)
 		assert.equal(options.version, Config.version)
 		assert.property(options.options?.compilerOptions, 'esModuleInterop')
 		assert.property(options.options?.compilerOptions, 'configFilePath')
 	})
 
-	test('do not write cache file when caching is disabled', async (assert) => {
+	test('do not write to cache when caching is disabled', async (assert) => {
 		const cwd = fs.basePath
 		const cacheRoot = join(fs.basePath, 'cache')
-
-		const tsConfigContents = JSON.stringify({
+		const contents = JSON.stringify({
 			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
 		})
-		await fs.add('tsconfig.json', tsConfigContents)
+
+		await fs.add('tsconfig.json', contents)
 
 		const config = new Config(cwd, cacheRoot, ts, false)
 		const options = config.parse()
 
-		const hasCacheFile = await fs.exists(`cache/tsconfig/${revisionHash(tsConfigContents)}.json`)
+		const hasCacheFile = await fs.exists(`cache/tsconfig/${revisionHash(contents)}.json`)
+		assert.isFalse(hasCacheFile)
 
 		assert.isNull(options.error)
-		assert.isFalse(hasCacheFile)
 		assert.equal(options.version, Config.version)
 		assert.property(options.options?.compilerOptions, 'esModuleInterop')
 		assert.property(options.options?.compilerOptions, 'configFilePath')
@@ -98,37 +97,42 @@ test.group('Config', (group) => {
 	test('return error when tsconfig file is invalid', async (assert) => {
 		const cwd = fs.basePath
 		const cacheRoot = join(fs.basePath, 'cache')
+		const contents = JSON.stringify({
+			extends: './node_modules/@adonisjs/mrm-preset/_tsconfig',
+		})
 
-		await fs.add(
-			'tsconfig.json',
-			JSON.stringify({
-				extends: './node_modules/@adonisjs/mrm-preset/_tsconfig',
-			})
-		)
+		await fs.add('tsconfig.json', contents)
 
 		const config = new Config(cwd, cacheRoot, ts)
-		const { error, options } = config.parse()
+		const options = config.parse()
 
-		assert.isNull(options)
-		assert.exists(error)
+		const hasCacheFile = await fs.exists(`cache/tsconfig/${revisionHash(contents)}.json`)
+		assert.isFalse(hasCacheFile)
+
+		assert.exists(options.error)
+		assert.isNull(options.options)
 		assert.equal(
-			error![0].messageText,
+			options.error![0].messageText,
 			`File './node_modules/@adonisjs/mrm-preset/_tsconfig' not found.`
 		)
 	})
 
-	test('return compiler options from cache when exists', async (assert) => {
+	test('read from cache when exists', async (assert) => {
 		const cwd = fs.basePath
 		const cacheRoot = join(fs.basePath, 'cache')
-
-		const tsConfigContents = JSON.stringify({
-			extends: './node_modules/@adonisjs/mrm-preset/_tsconfig',
+		const contents = JSON.stringify({
+			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
 		})
-		await fs.add('tsconfig.json', tsConfigContents)
 
+		await fs.add('tsconfig.json', contents)
+
+		/**
+		 * Creating cache file
+		 */
 		await fs.add(
-			`cache/tsconfig/${revisionHash(tsConfigContents)}.json`,
+			`cache/tsconfig/${revisionHash(contents)}.json`,
 			JSON.stringify({
+				version: Config.version,
 				compilerOptions: {
 					dummyValue: true,
 				},
@@ -136,23 +140,56 @@ test.group('Config', (group) => {
 		)
 
 		const config = new Config(cwd, cacheRoot, ts)
-		const { error, options } = config.parse()
-
-		assert.isNull(error)
-		assert.deepEqual(options, { compilerOptions: { dummyValue: true }, transformers: undefined })
+		const options = config.parse()
+		assert.isNull(options.error)
+		assert.deepEqual(options.options, {
+			compilerOptions: { dummyValue: true },
+			transformers: undefined,
+		})
 	})
 
-	test('return version from the cache when exists', async (assert) => {
+	test('do not read from cache when caching is disabled', async (assert) => {
 		const cwd = fs.basePath
 		const cacheRoot = join(fs.basePath, 'cache')
-
-		const tsConfigContents = JSON.stringify({
-			extends: './node_modules/@adonisjs/mrm-preset/_tsconfig',
+		const contents = JSON.stringify({
+			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
 		})
-		await fs.add('tsconfig.json', tsConfigContents)
 
+		await fs.add('tsconfig.json', contents)
+
+		/**
+		 * Creating cache file
+		 */
 		await fs.add(
-			`cache/tsconfig/${revisionHash(tsConfigContents)}.json`,
+			`cache/tsconfig/${revisionHash(contents)}.json`,
+			JSON.stringify({
+				version: Config.version,
+				compilerOptions: {
+					dummyValue: true,
+				},
+			})
+		)
+
+		const config = new Config(cwd, cacheRoot, ts, false)
+		const options = config.parse()
+		assert.isNull(options.error)
+		assert.notProperty(options.options?.compilerOptions, 'dummyValue')
+	})
+
+	test('do not read from cache during version mis-match', async (assert) => {
+		const cwd = fs.basePath
+		const cacheRoot = join(fs.basePath, 'cache')
+		const contents = JSON.stringify({
+			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
+		})
+
+		await fs.add('tsconfig.json', contents)
+
+		/**
+		 * Creating cache file
+		 */
+		await fs.add(
+			`cache/tsconfig/${revisionHash(contents)}.json`,
 			JSON.stringify({
 				version: 'v0.0',
 				compilerOptions: {
@@ -162,43 +199,17 @@ test.group('Config', (group) => {
 		)
 
 		const config = new Config(cwd, cacheRoot, ts)
-		const { error, version } = config.parse()
-
-		assert.isNull(error)
-		assert.equal(version, 'v0.0')
+		const options = config.parse()
+		assert.isNull(options.error)
+		assert.notProperty(options.options?.compilerOptions, 'dummyValue')
 	})
 
-	test('ignore cache when caching is disabled', async (assert) => {
+	test('do not read from cache during when file contents has changed', async (assert) => {
 		const cwd = fs.basePath
 		const cacheRoot = join(fs.basePath, 'cache')
-
-		const tsConfigContents = JSON.stringify({
-			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
-		})
-		await fs.add('tsconfig.json', tsConfigContents)
-
-		await fs.add(
-			`cache/tsconfig/${revisionHash(tsConfigContents)}.json`,
-			JSON.stringify({
-				dummyValue: true,
-			})
-		)
-
-		const config = new Config(cwd, cacheRoot, ts, false)
-		const { error, options } = config.parse()
-
-		assert.isNull(error)
-		assert.notProperty(options, 'dummyValue')
-	})
-
-	test('ignore cache when source file has been changed', async (assert) => {
-		const cwd = fs.basePath
-		const cacheRoot = join(fs.basePath, 'cache')
-
-		const tsConfigContents = JSON.stringify({
+		const contents = JSON.stringify({
 			extends: './node_modules/@adonisjs/mrm-preset/_tsconfig',
 		})
-		const hash = revisionHash(tsConfigContents)
 
 		await fs.add(
 			'tsconfig.json',
@@ -206,18 +217,24 @@ test.group('Config', (group) => {
 				extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
 			})
 		)
+
+		/**
+		 * Creating cache file
+		 */
 		await fs.add(
-			`cache/${hash}.json`,
+			`cache/tsconfig/${revisionHash(contents)}.json`,
 			JSON.stringify({
-				dummyValue: true,
+				version: Config.version,
+				compilerOptions: {
+					dummyValue: true,
+				},
 			})
 		)
 
 		const config = new Config(cwd, cacheRoot, ts)
-		const { error, options } = config.parse()
-
-		assert.isNull(error)
-		assert.notProperty(options, 'dummyValue')
+		const options = config.parse()
+		assert.isNull(options.error)
+		assert.notProperty(options.options?.compilerOptions, 'dummyValue')
 	})
 
 	test('fetch transformers from the raw config file', async (assert) => {
@@ -229,7 +246,7 @@ test.group('Config', (group) => {
 			JSON.stringify({
 				extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
 				transformers: {
-					after: [{ transform: '@adonisjs/ioc-transformer' }]
+					after: [{ transform: '@adonisjs/ioc-transformer' }],
 				},
 			})
 		)
