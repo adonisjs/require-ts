@@ -16,10 +16,21 @@ import { Cache, FakeCache } from '../Cache'
 import { DiagnosticsReporter } from '../DiagnosticsReporter'
 
 /**
+ * Custom transformers extracted from the package.json file
+ */
+type Transformers = {
+	before?: { transform: string }[],
+	after?: { transform: string }[],
+	afterDeclarations?: { transform: string }[],
+}
+
+/**
  * Exposes the API to parse tsconfig file and cache it until the
  * contents of the file are changed.
  */
 export class Config {
+	public static version = 'v1'
+
 	/**
 	 * Hard assumption has been made that config file name
 	 * is "tsconfig.json"
@@ -130,15 +141,31 @@ export class Config {
 	}
 
 	/**
+	 * Extracts transformers the tsconfig file contents
+	 */
+	private extractTransformers(rawConfig: string): Transformers | undefined {
+		try {
+			const transformers = JSON.parse(rawConfig).transformers || {}
+			return {
+				before: transformers.before,
+				after: transformers.after,
+				afterDeclarations: transformers.afterDeclarations,
+			}
+		} catch (error) {}
+	}
+
+	/**
 	 * Parses config and returns the compiler options
 	 */
 	public parse(): {
-		options: null | tsStatic.CompilerOptions
+		version: string,
+		options: null | { compilerOptions: tsStatic.CompilerOptions, transformers?: Transformers }
 		error: null | tsStatic.Diagnostic[]
 	} {
+		const rawContents = this.getConfigRawContents()
 		const cachePath = this.cache.makeCachePath(
 			this.configFilePath,
-			this.getConfigRawContents(),
+			rawContents,
 			'.json'
 		)
 
@@ -148,8 +175,12 @@ export class Config {
 		const cached = this.parseConfigAsJson(this.cache.get(cachePath))
 		if (cached) {
 			return {
+				version: cached.version,
 				error: null,
-				options: cached,
+				options: {
+					compilerOptions: cached.compilerOptions,
+					transformers: cached.transformers
+				},
 			}
 		}
 
@@ -159,7 +190,11 @@ export class Config {
 		const config = this.parseTsConfig()
 		if (config.error) {
 			this.diagnosticsReporter.report(config.error)
-			return config
+			return {
+				version: Config.version,
+				options: null,
+				error: config.error,
+			}
 		}
 
 		/**
@@ -167,8 +202,12 @@ export class Config {
 		 */
 		this.cache.set(cachePath, JSON.stringify(config.options))
 		return {
+			version: Config.version,
 			error: null,
-			options: config.options,
+			options: {
+				compilerOptions: config.options,
+				transformers: this.extractTransformers(rawContents)
+			},
 		}
 	}
 }
