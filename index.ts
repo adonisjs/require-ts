@@ -7,9 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import { join } from 'path'
 import { addHook } from 'pirates'
-import { readFileSync } from 'fs-extra'
 import findCacheDir from 'find-cache-dir'
 
 import { Cache } from './src/Cache'
@@ -41,13 +39,9 @@ export function getWatcherHelpers(appRoot: string, cachePath?: string) {
 			return filePath ? cache.clearForFile(filePath) : cache.clearAll()
 		},
 		isConfigStale: () => {
-			const configFilePath = join(appRoot, 'tsconfig.json')
-			try {
-				const contents = readFileSync(configFilePath, 'utf-8')
-				return !cache.get(cache.makeCachePath(configFilePath, contents, '.json'))
-			} catch (error) {
-				return true
-			}
+			const cache = new Config(appRoot, cachePath!, {} as any, true)
+			const { cached } = cache.getCached()
+			return !cached || cached.version !== Config.version
 		},
 	}
 }
