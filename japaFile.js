@@ -1,3 +1,4 @@
+process.env.DEBUG = 'adonis:require-ts'
 require('ts-node/register')
 
 const { configure } = require('japa')

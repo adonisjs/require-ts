@@ -5,7 +5,7 @@
 	"scripts": {
 		"mrm": "mrm --preset=@adonisjs/mrm-preset",
 		"pretest": "npm run lint",
-		"test": "DEBUG=adonis:require-ts node japaFile.js",
+		"test": "node japaFile.js",
 		"clean": "del build",
 		"compile": "npm run lint && npm run clean && tsc",
 		"build": "npm run compile",
