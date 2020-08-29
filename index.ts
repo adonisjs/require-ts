@@ -31,7 +31,7 @@ const CACHE_DIR_NAME = 'adonis-require-ts'
  * - Clear all cache
  */
 export function getWatcherHelpers(appRoot: string, cachePath?: string) {
-	cachePath = cachePath || findCacheDir(CACHE_DIR_NAME)
+	cachePath = cachePath || findCacheDir({ name: CACHE_DIR_NAME })
 	const cache = new Cache(appRoot, cachePath!)
 
 	return {
@@ -39,8 +39,8 @@ export function getWatcherHelpers(appRoot: string, cachePath?: string) {
 			return filePath ? cache.clearForFile(filePath) : cache.clearAll()
 		},
 		isConfigStale: () => {
-			const cache = new Config(appRoot, cachePath!, {} as any, true)
-			const { cached } = cache.getCached()
+			const config = new Config(appRoot, cachePath!, {} as any, true)
+			const { cached } = config.getCached()
 			return !cached || cached.version !== Config.version
 		},
 	}
@@ -63,7 +63,7 @@ export function register(
 	 */
 	opts = Object.assign({ cache: false, cachePath: '' }, opts)
 	if (opts.cache && !opts.cachePath) {
-		opts.cachePath = findCacheDir(CACHE_DIR_NAME)
+		opts.cachePath = findCacheDir({ name: CACHE_DIR_NAME })
 	}
 
 	const typescript = loadTypescript(appRoot)
