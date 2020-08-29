@@ -133,10 +133,11 @@ test.group('Compiler', (group) => {
 			          && ts.isIdentifier(node.expression)
 			          && node.expression.escapedText === 'require'
 			        ) {
+			        	const moduleName = node.arguments[0].text
 			        	return ts.createCall(
-		              ts.createIdentifier('require'),
+		              ts.createIdentifier('ioc.use'),
 		              undefined,
-		              [ts.createStringLiteral(\`\${appRoot}\`)],
+		              [ts.createStringLiteral(moduleName)],
 		            )
 			        }
 							return ts.visitEachChild(node, visitor, ctx)
@@ -160,7 +161,7 @@ test.group('Compiler', (group) => {
 			stringToArray(output).slice(0, -1),
 			stringToArray(`"use strict";
 			Object.defineProperty(exports, "__esModule", { value: true });
-			require("${cwd}");`)
+			ioc.use("foo");`)
 		)
 	})
 })
