@@ -133,8 +133,10 @@ test.group('Config', (group) => {
 			`cache/tsconfig/${revisionHash(contents)}.json`,
 			JSON.stringify({
 				version: Config.version,
-				compilerOptions: {
-					dummyValue: true,
+				options: {
+					compilerOptions: {
+						dummyValue: true,
+					},
 				},
 			})
 		)
@@ -164,8 +166,10 @@ test.group('Config', (group) => {
 			`cache/tsconfig/${revisionHash(contents)}.json`,
 			JSON.stringify({
 				version: Config.version,
-				compilerOptions: {
-					dummyValue: true,
+				options: {
+					compilerOptions: {
+						dummyValue: true,
+					},
 				},
 			})
 		)
@@ -192,8 +196,10 @@ test.group('Config', (group) => {
 			`cache/tsconfig/${revisionHash(contents)}.json`,
 			JSON.stringify({
 				version: 'v0.0',
-				compilerOptions: {
-					dummyValue: true,
+				options: {
+					compilerOptions: {
+						dummyValue: true,
+					},
 				},
 			})
 		)
@@ -225,8 +231,10 @@ test.group('Config', (group) => {
 			`cache/tsconfig/${revisionHash(contents)}.json`,
 			JSON.stringify({
 				version: Config.version,
-				compilerOptions: {
-					dummyValue: true,
+				options: {
+					compilerOptions: {
+						dummyValue: true,
+					},
 				},
 			})
 		)
@@ -259,6 +267,27 @@ test.group('Config', (group) => {
 			after: [{ transform: '@adonisjs/ioc-transformer' }],
 			before: undefined,
 			afterDeclarations: undefined,
+		})
+	})
+
+	test('cache transformers', async (assert) => {
+		const cwd = fs.basePath
+		const cacheRoot = join(fs.basePath, 'cache')
+
+		const contents = JSON.stringify({
+			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
+			transformers: {
+				after: [{ transform: '@adonisjs/ioc-transformer' }],
+			},
+		})
+		await fs.add('tsconfig.json', contents)
+
+		const config = new Config(cwd, cacheRoot, ts)
+		config.parse()
+
+		const cacheContents = await fs.get(`cache/tsconfig/${revisionHash(contents)}.json`)
+		assert.deepEqual(JSON.parse(cacheContents).options.transformers, {
+			after: [{ transform: '@adonisjs/ioc-transformer' }],
 		})
 	})
 })

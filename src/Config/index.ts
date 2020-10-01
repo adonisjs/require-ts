@@ -155,8 +155,7 @@ export class Config {
 		cachePath: string
 		cached: null | {
 			version: string
-			compilerOptions: tsStatic.CompilerOptions
-			transformers?: Transformers
+			options: { compilerOptions: tsStatic.CompilerOptions; transformers?: Transformers }
 		}
 	} {
 		const rawContents = this.getConfigRawContents()
@@ -185,8 +184,8 @@ export class Config {
 				version: cached.version,
 				error: null,
 				options: {
-					compilerOptions: cached.compilerOptions,
-					transformers: cached.transformers,
+					compilerOptions: cached.options.compilerOptions,
+					transformers: cached.options.transformers,
 				},
 			}
 		}
@@ -207,8 +206,7 @@ export class Config {
 		/**
 		 * Write to cache to avoid future parsing
 		 */
-		this.cache.set(cachePath, JSON.stringify(config.options))
-		return {
+		const parsed = {
 			version: Config.version,
 			error: null,
 			options: {
@@ -216,5 +214,8 @@ export class Config {
 				transformers: this.extractTransformers(raw),
 			},
 		}
+
+		this.cache.set(cachePath, JSON.stringify(parsed))
+		return parsed
 	}
 }

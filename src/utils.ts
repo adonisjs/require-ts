@@ -7,8 +7,8 @@
  * file that was distributed with this source code.
  */
 
-import normalizePath from 'normalize-path'
 import Debug from 'debug'
+import normalizePath from 'normalize-path'
 
 export const debug = Debug('adonis:require-ts')
 
