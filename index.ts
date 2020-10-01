@@ -14,6 +14,7 @@ import { Cache } from './src/Cache'
 import { Config } from './src/Config'
 import { Compiler } from './src/Compiler'
 import { loadTypescript } from './src/utils'
+import { Transformers } from './src/Contracts'
 
 /**
  * Extensions to register require extension for
@@ -39,7 +40,7 @@ export function getWatcherHelpers(appRoot: string, cachePath?: string) {
 			return filePath ? cache.clearForFile(filePath) : cache.clearAll()
 		},
 		isConfigStale: () => {
-			const config = new Config(appRoot, cachePath!, {} as any, true)
+			const config = new Config(appRoot, cachePath!, {} as any, undefined, true)
 			const { cached } = config.getCached()
 			return !cached || cached.version !== Config.version
 		},
@@ -56,6 +57,7 @@ export function register(
 	opts?: {
 		cache?: boolean
 		cachePath?: string
+		transformers?: Transformers
 	}
 ) {
 	/**
@@ -69,9 +71,19 @@ export function register(
 	const typescript = loadTypescript(appRoot)
 
 	/**
+	 * Parse config
+	 */
+	const config = new Config(
+		appRoot,
+		opts.cachePath!,
+		typescript,
+		opts.transformers,
+		!!opts.cache
+	).parse()
+
+	/**
 	 * Cannot continue when config has errors
 	 */
-	const config = new Config(appRoot, opts.cachePath!, typescript, !!opts.cache).parse()
 	if (config.error) {
 		process.exit(1)
 	}
