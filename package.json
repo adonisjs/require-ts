@@ -81,6 +81,7 @@
 		"anyBranch": false
 	},
 	"dependencies": {
+		"@poppinss/utils": "^2.5.7",
 		"debug": "^4.2.0",
 		"find-cache-dir": "^3.3.1",
 		"fs-extra": "^9.0.1",

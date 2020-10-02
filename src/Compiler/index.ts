@@ -8,6 +8,7 @@
  */
 
 import tsStatic from 'typescript'
+import { esmRequire } from '@poppinss/utils'
 import sourceMapSupport from 'source-map-support'
 
 import { debug } from '../utils'
@@ -89,7 +90,7 @@ export class Compiler {
 	 */
 	private resolverTransformer(transformer: string) {
 		try {
-			const value = require(require.resolve(transformer, { paths: [this.appRoot] }))
+			const value = esmRequire(require.resolve(transformer, { paths: [this.appRoot] }))
 			if (typeof value !== 'function') {
 				throw new Error('Transformer module must export a function')
 			}
