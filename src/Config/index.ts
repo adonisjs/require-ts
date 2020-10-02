@@ -43,7 +43,6 @@ export class Config {
 		private appRoot: string,
 		private cacheRoot: string,
 		private ts: typeof tsStatic,
-		private transformers?: Transformers,
 		private usesCache: boolean = true
 	) {}
 
@@ -54,6 +53,7 @@ export class Config {
 	 */
 	private getConfigRawContents(): string {
 		debug('checking for tsconfig "%s"', this.configFilePath)
+
 		try {
 			return readFileSync(this.configFilePath, 'utf-8')
 		} catch (error) {
@@ -134,34 +134,6 @@ export class Config {
 	}
 
 	/**
-	 * Merge user define transformers with config file transformers
-	 */
-	private mergeCustomTransfomers(configTransformers?: Transformers): Transformers | undefined {
-		if (!this.transformers) {
-			return configTransformers
-		}
-
-		if (this.transformers.before) {
-			configTransformers = configTransformers || {}
-			configTransformers.before = (configTransformers.before || []).concat(this.transformers.before)
-		}
-
-		if (this.transformers.after) {
-			configTransformers = configTransformers || {}
-			configTransformers.after = (configTransformers.after || []).concat(this.transformers.after)
-		}
-
-		if (this.transformers.afterDeclarations) {
-			configTransformers = configTransformers || {}
-			configTransformers.afterDeclarations = (configTransformers.afterDeclarations || []).concat(
-				this.transformers.afterDeclarations
-			)
-		}
-
-		return configTransformers
-	}
-
-	/**
 	 * Extracts transformers the tsconfig file contents
 	 */
 	private extractTransformers(rawConfig: string): Transformers | undefined {
@@ -214,7 +186,7 @@ export class Config {
 				error: null,
 				options: {
 					compilerOptions: cached.options.compilerOptions,
-					transformers: this.mergeCustomTransfomers(cached.options.transformers),
+					transformers: cached.options.transformers,
 				},
 			}
 		}
@@ -245,12 +217,6 @@ export class Config {
 		}
 
 		this.cache.set(cachePath, JSON.stringify(parsed))
-
-		/**
-		 * Merge custom transformers only after writing to the cache. So that we
-		 * are not caching custom transformers
-		 */
-		parsed.options.transformers = this.mergeCustomTransfomers(parsed.options.transformers)
 		return parsed
 	}
 }

@@ -57,7 +57,6 @@ export function register(
 	opts?: {
 		cache?: boolean
 		cachePath?: string
-		transformers?: Transformers
 	}
 ) {
 	/**
@@ -73,13 +72,7 @@ export function register(
 	/**
 	 * Parse config
 	 */
-	const config = new Config(
-		appRoot,
-		opts.cachePath!,
-		typescript,
-		opts.transformers,
-		!!opts.cache
-	).parse()
+	const config = new Config(appRoot, opts.cachePath!, typescript, !!opts.cache).parse()
 
 	/**
 	 * Cannot continue when config has errors

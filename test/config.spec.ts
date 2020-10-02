@@ -70,7 +70,7 @@ test.group('Config', (group) => {
 
 		await fs.add('tsconfig.json', contents)
 
-		const config = new Config(cwd, cacheRoot, ts, undefined, false)
+		const config = new Config(cwd, cacheRoot, ts, false)
 		const options = config.parse()
 
 		const hasCacheFile = await fs.exists(`cache/tsconfig/${revisionHash(contents)}.json`)
@@ -174,7 +174,7 @@ test.group('Config', (group) => {
 			})
 		)
 
-		const config = new Config(cwd, cacheRoot, ts, undefined, false)
+		const config = new Config(cwd, cacheRoot, ts, false)
 		const options = config.parse()
 		assert.isNull(options.error)
 		assert.notProperty(options.options?.compilerOptions, 'dummyValue')
@@ -287,74 +287,6 @@ test.group('Config', (group) => {
 
 		const cacheContents = await fs.get(`cache/tsconfig/${revisionHash(contents)}.json`)
 		assert.deepEqual(JSON.parse(cacheContents).options.transformers, {
-			after: [{ transform: '@adonisjs/ioc-transformer' }],
-		})
-	})
-
-	test('do not cache custom transformers', async (assert) => {
-		const cwd = fs.basePath
-		const cacheRoot = join(fs.basePath, 'cache')
-
-		const contents = JSON.stringify({
-			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
-		})
-		await fs.add('tsconfig.json', contents)
-
-		const config = new Config(cwd, cacheRoot, ts, {
-			after: [{ transform: '@adonisjs/ioc-transformer' }],
-		})
-		config.parse()
-
-		const cacheContents = await fs.get(`cache/tsconfig/${revisionHash(contents)}.json`)
-		assert.deepEqual(JSON.parse(cacheContents).options.transformers, {})
-	})
-
-	test('return custom transformers from the parse call', async (assert) => {
-		const cwd = fs.basePath
-		const cacheRoot = join(fs.basePath, 'cache')
-
-		const contents = JSON.stringify({
-			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
-		})
-		await fs.add('tsconfig.json', contents)
-
-		const config = new Config(cwd, cacheRoot, ts, {
-			after: [{ transform: '@adonisjs/ioc-transformer' }],
-		})
-		const { options } = config.parse()
-
-		const cacheContents = await fs.get(`cache/tsconfig/${revisionHash(contents)}.json`)
-		assert.deepEqual(JSON.parse(cacheContents).options.transformers, {})
-		assert.deepEqual(options?.transformers, {
-			after: [{ transform: '@adonisjs/ioc-transformer' }],
-			afterDeclarations: undefined,
-			before: undefined,
-		})
-	})
-
-	test('return custom transformers when config file is cached', async (assert) => {
-		const cwd = fs.basePath
-		const cacheRoot = join(fs.basePath, 'cache')
-
-		const contents = JSON.stringify({
-			extends: '../../node_modules/@adonisjs/mrm-preset/_tsconfig',
-		})
-		await fs.add('tsconfig.json', contents)
-
-		const config = new Config(cwd, cacheRoot, ts, {
-			after: [{ transform: '@adonisjs/ioc-transformer' }],
-		})
-		config.parse()
-
-		const cacheContents = await fs.get(`cache/tsconfig/${revisionHash(contents)}.json`)
-		assert.deepEqual(JSON.parse(cacheContents).options.transformers, {})
-
-		const config1 = new Config(cwd, cacheRoot, ts, {
-			after: [{ transform: '@adonisjs/ioc-transformer' }],
-		})
-		const { options } = config1.parse()
-
-		assert.deepEqual(options?.transformers, {
 			after: [{ transform: '@adonisjs/ioc-transformer' }],
 		})
 	})
