@@ -40,7 +40,7 @@ export function getWatcherHelpers(appRoot: string, cachePath?: string) {
 			return filePath ? cache.clearForFile(filePath) : cache.clearAll()
 		},
 		isConfigStale: () => {
-			const config = new Config(appRoot, cachePath!, {} as any, undefined, true)
+			const config = new Config(appRoot, cachePath!, {} as any, true)
 			const { cached } = config.getCached()
 			return !cached || cached.version !== Config.version
 		},
@@ -57,6 +57,7 @@ export function register(
 	opts?: {
 		cache?: boolean
 		cachePath?: string
+		transformers?: Transformers
 	}
 ) {
 	/**
@@ -79,6 +80,31 @@ export function register(
 	 */
 	if (config.error) {
 		process.exit(1)
+	}
+
+	/**
+	 * Merge transformers when defined
+	 */
+	if (opts.transformers) {
+		config.options!.transformers = config.options!.transformers || {}
+
+		if (opts.transformers.before) {
+			config.options!.transformers.before = (config.options!.transformers.before || []).concat(
+				opts.transformers.before
+			)
+		}
+
+		if (opts.transformers.after) {
+			config.options!.transformers.after = (config.options!.transformers.after || []).concat(
+				opts.transformers.after
+			)
+		}
+
+		if (opts.transformers.afterDeclarations) {
+			config.options!.transformers.afterDeclarations = (
+				config.options!.transformers.afterDeclarations || []
+			).concat(opts.transformers.afterDeclarations)
+		}
 	}
 
 	/**
