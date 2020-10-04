@@ -23,6 +23,14 @@ const EXTS = ['.ts']
 const CACHE_DIR_NAME = 'adonis-require-ts'
 
 /**
+ * Symbols that can be used to get the global reference of the compiler
+ */
+export const symbols = {
+	compiler: Symbol.for('REQUIRE_TS_COMPILER'),
+	config: Symbol.for('REQUIRE_TS_CONFIG'),
+}
+
+/**
  * Returns helpers to along with cache when using a watcher.
  *
  * - You can check if the tsconfig file inside the cache is stale or not.
@@ -112,6 +120,9 @@ export function register(
 	 * we not resolve `.js` files and will never resolve `.tsx` or `.jsx` files.
 	 */
 	const compiler = new Compiler(appRoot, opts.cachePath!, typescript, config.options!, !!opts.cache)
+	global[symbols.compiler] = compiler
+	global[symbols.config] = config
+
 	addHook(
 		(code, filename) => {
 			return compiler.compile(filename, code)
