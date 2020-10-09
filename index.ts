@@ -8,6 +8,7 @@
  */
 
 import { addHook } from 'pirates'
+import tsStatic from 'typescript'
 import findCacheDir from 'find-cache-dir'
 
 import { Cache } from './src/Cache'
@@ -48,11 +49,22 @@ export function getWatcherHelpers(appRoot: string, cachePath?: string) {
 			return filePath ? cache.clearForFile(filePath) : cache.clearAll()
 		},
 		isConfigStale: () => {
-			const config = new Config(appRoot, cachePath!, {} as any, true)
+			const config = new Config(appRoot, cachePath!, undefined, true)
 			const { cached } = config.getCached()
 			return !cached || cached.version !== Config.version
 		},
 	}
+}
+
+/**
+ * Load in-memory typescript compiler
+ */
+export function loadCompiler(appRoot: string, options: {
+	compilerOptions: tsStatic.CompilerOptions
+	transformers?: Transformers
+}) {
+	const typescript = loadTypescript(appRoot)
+	return new Compiler(appRoot, appRoot, typescript, options, false)
 }
 
 /**

@@ -37,12 +37,12 @@ export class Config {
 	/**
 	 * Dignostic reporter to print program errors
 	 */
-	private diagnosticsReporter = new DiagnosticsReporter(this.appRoot, this.ts, false)
+	private diagnosticsReporter = this.ts ? new DiagnosticsReporter(this.appRoot, this.ts, false) : undefined
 
 	constructor(
 		private appRoot: string,
 		private cacheRoot: string,
-		private ts: typeof tsStatic,
+		private ts?: typeof tsStatic,
 		private usesCache: boolean = true
 	) {}
 
@@ -73,6 +73,10 @@ export class Config {
 	private parseTsConfig(): { error: null | tsStatic.Diagnostic[]; options: any } {
 		let exception: any = null
 		debug('parse tsconfig file')
+
+		if (!this.ts) {
+			throw new Error('Cannot parse typescript config. Make sure to instantiate Config class with typescript compiler')
+		}
 
 		/**
 		 * Parse config using typescript compiler
@@ -176,6 +180,10 @@ export class Config {
 		options: null | { compilerOptions: tsStatic.CompilerOptions; transformers?: Transformers }
 		error: null | tsStatic.Diagnostic[]
 	} {
+		if (!this.diagnosticsReporter) {
+			throw new Error('Cannot parse typescript config. Make sure to instantiate Config class with typescript compiler')
+		}
+
 		/**
 		 * Cache exists and is upto date
 		 */
