@@ -20,7 +20,7 @@ import { Transformers } from './src/Contracts'
 /**
  * Extensions to register require extension for
  */
-const EXTS = ['.ts']
+const EXTS = ['.ts', '.tsx']
 const CACHE_DIR_NAME = 'adonis-require-ts'
 
 /**
