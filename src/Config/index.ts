@@ -37,7 +37,9 @@ export class Config {
 	/**
 	 * Dignostic reporter to print program errors
 	 */
-	private diagnosticsReporter = this.ts ? new DiagnosticsReporter(this.appRoot, this.ts, false) : undefined
+	private diagnosticsReporter = this.ts
+		? new DiagnosticsReporter(this.appRoot, this.ts, false)
+		: undefined
 
 	constructor(
 		private appRoot: string,
@@ -75,7 +77,9 @@ export class Config {
 		debug('parse tsconfig file')
 
 		if (!this.ts) {
-			throw new Error('Cannot parse typescript config. Make sure to instantiate Config class with typescript compiler')
+			throw new Error(
+				'Cannot parse typescript config. Make sure to instantiate Config class with typescript compiler'
+			)
 		}
 
 		/**
@@ -181,7 +185,9 @@ export class Config {
 		error: null | tsStatic.Diagnostic[]
 	} {
 		if (!this.diagnosticsReporter) {
-			throw new Error('Cannot parse typescript config. Make sure to instantiate Config class with typescript compiler')
+			throw new Error(
+				'Cannot parse typescript config. Make sure to instantiate Config class with typescript compiler'
+			)
 		}
 
 		/**

@@ -59,10 +59,13 @@ export function getWatcherHelpers(appRoot: string, cachePath?: string) {
 /**
  * Load in-memory typescript compiler
  */
-export function loadCompiler(appRoot: string, options: {
-	compilerOptions: tsStatic.CompilerOptions
-	transformers?: Transformers
-}) {
+export function loadCompiler(
+	appRoot: string,
+	options: {
+		compilerOptions: tsStatic.CompilerOptions
+		transformers?: Transformers
+	}
+) {
 	const typescript = loadTypescript(appRoot)
 	return new Compiler(appRoot, appRoot, typescript, options, false)
 }
