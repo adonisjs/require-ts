@@ -13,28 +13,28 @@ import tsStatic from 'typescript'
  * Exposes the API to report/print typescript diagnostic reports
  */
 export class DiagnosticsReporter {
-	/**
-	 * Diagnostics host
-	 */
-	private host = {
-		getNewLine: () => this.ts.sys.newLine,
-		getCurrentDirectory: () => this.appRoot,
-		getCanonicalFileName: this.ts.sys.useCaseSensitiveFileNames
-			? (fileName: string) => fileName
-			: (fileName: string) => fileName.toLowerCase(),
-	}
+  /**
+   * Diagnostics host
+   */
+  private host = {
+    getNewLine: () => this.ts.sys.newLine,
+    getCurrentDirectory: () => this.appRoot,
+    getCanonicalFileName: this.ts.sys.useCaseSensitiveFileNames
+      ? (fileName: string) => fileName
+      : (fileName: string) => fileName.toLowerCase(),
+  }
 
-	constructor(private appRoot: string, private ts: typeof tsStatic, private pretty: boolean) {}
+  constructor(private appRoot: string, private ts: typeof tsStatic, private pretty: boolean) {}
 
-	public report(diagnostics: tsStatic.Diagnostic[]) {
-		if (!diagnostics.length) {
-			return
-		}
+  public report(diagnostics: tsStatic.Diagnostic[]) {
+    if (!diagnostics.length) {
+      return
+    }
 
-		if (this.pretty) {
-			console.log(this.ts.formatDiagnosticsWithColorAndContext(diagnostics, this.host))
-		} else {
-			console.log(this.ts.formatDiagnostics(diagnostics, this.host))
-		}
-	}
+    if (this.pretty) {
+      console.log(this.ts.formatDiagnosticsWithColorAndContext(diagnostics, this.host))
+    } else {
+      console.log(this.ts.formatDiagnostics(diagnostics, this.host))
+    }
+  }
 }

@@ -8,5 +8,5 @@
  */
 
 export function stringToArray(value: string) {
-	return value.split('\n').map((line) => line.trim())
+  return value.split('\n').map((line) => line.trim())
 }

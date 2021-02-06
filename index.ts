@@ -27,8 +27,8 @@ const CACHE_DIR_NAME = 'adonis-require-ts'
  * Symbols that can be used to get the global reference of the compiler
  */
 export const symbols = {
-	compiler: Symbol.for('REQUIRE_TS_COMPILER'),
-	config: Symbol.for('REQUIRE_TS_CONFIG'),
+  compiler: Symbol.for('REQUIRE_TS_COMPILER'),
+  config: Symbol.for('REQUIRE_TS_CONFIG'),
 }
 
 /**
@@ -41,33 +41,33 @@ export const symbols = {
  * - Clear all cache
  */
 export function getWatcherHelpers(appRoot: string, cachePath?: string) {
-	cachePath = cachePath || findCacheDir({ name: CACHE_DIR_NAME })
-	const cache = new Cache(appRoot, cachePath!)
+  cachePath = cachePath || findCacheDir({ name: CACHE_DIR_NAME })
+  const cache = new Cache(appRoot, cachePath!)
 
-	return {
-		clear(filePath?: string) {
-			return filePath ? cache.clearForFile(filePath) : cache.clearAll()
-		},
-		isConfigStale: () => {
-			const config = new Config(appRoot, cachePath!, undefined, true)
-			const { cached } = config.getCached()
-			return !cached || cached.version !== Config.version
-		},
-	}
+  return {
+    clear(filePath?: string) {
+      return filePath ? cache.clearForFile(filePath) : cache.clearAll()
+    },
+    isConfigStale: () => {
+      const config = new Config(appRoot, cachePath!, undefined, true)
+      const { cached } = config.getCached()
+      return !cached || cached.version !== Config.version
+    },
+  }
 }
 
 /**
  * Load in-memory typescript compiler
  */
 export function loadCompiler(
-	appRoot: string,
-	options: {
-		compilerOptions: tsStatic.CompilerOptions
-		transformers?: Transformers
-	}
+  appRoot: string,
+  options: {
+    compilerOptions: tsStatic.CompilerOptions
+    transformers?: Transformers
+  }
 ) {
-	const typescript = loadTypescript(appRoot)
-	return new Compiler(appRoot, appRoot, typescript, options, false)
+  const typescript = loadTypescript(appRoot)
+  return new Compiler(appRoot, appRoot, typescript, options, false)
 }
 
 /**
@@ -76,72 +76,72 @@ export function loadCompiler(
  * on the disk
  */
 export function register(
-	appRoot: string,
-	opts?: {
-		cache?: boolean
-		cachePath?: string
-		transformers?: Transformers
-	}
+  appRoot: string,
+  opts?: {
+    cache?: boolean
+    cachePath?: string
+    transformers?: Transformers
+  }
 ) {
-	/**
-	 * Normalize options
-	 */
-	opts = Object.assign({ cache: false, cachePath: '' }, opts)
-	if (opts.cache && !opts.cachePath) {
-		opts.cachePath = findCacheDir({ name: CACHE_DIR_NAME })
-	}
+  /**
+   * Normalize options
+   */
+  opts = Object.assign({ cache: false, cachePath: '' }, opts)
+  if (opts.cache && !opts.cachePath) {
+    opts.cachePath = findCacheDir({ name: CACHE_DIR_NAME })
+  }
 
-	const typescript = loadTypescript(appRoot)
+  const typescript = loadTypescript(appRoot)
 
-	/**
-	 * Parse config
-	 */
-	const config = new Config(appRoot, opts.cachePath!, typescript, !!opts.cache).parse()
+  /**
+   * Parse config
+   */
+  const config = new Config(appRoot, opts.cachePath!, typescript, !!opts.cache).parse()
 
-	/**
-	 * Cannot continue when config has errors
-	 */
-	if (config.error) {
-		process.exit(1)
-	}
+  /**
+   * Cannot continue when config has errors
+   */
+  if (config.error) {
+    process.exit(1)
+  }
 
-	/**
-	 * Merge transformers when defined
-	 */
-	if (opts.transformers) {
-		config.options!.transformers = config.options!.transformers || {}
+  /**
+   * Merge transformers when defined
+   */
+  if (opts.transformers) {
+    config.options!.transformers = config.options!.transformers || {}
 
-		if (opts.transformers.before) {
-			config.options!.transformers.before = (config.options!.transformers.before || []).concat(
-				opts.transformers.before
-			)
-		}
+    if (opts.transformers.before) {
+      config.options!.transformers.before = (config.options!.transformers.before || []).concat(
+        opts.transformers.before
+      )
+    }
 
-		if (opts.transformers.after) {
-			config.options!.transformers.after = (config.options!.transformers.after || []).concat(
-				opts.transformers.after
-			)
-		}
+    if (opts.transformers.after) {
+      config.options!.transformers.after = (config.options!.transformers.after || []).concat(
+        opts.transformers.after
+      )
+    }
 
-		if (opts.transformers.afterDeclarations) {
-			config.options!.transformers.afterDeclarations = (
-				config.options!.transformers.afterDeclarations || []
-			).concat(opts.transformers.afterDeclarations)
-		}
-	}
+    if (opts.transformers.afterDeclarations) {
+      config.options!.transformers.afterDeclarations = (
+        config.options!.transformers.afterDeclarations || []
+      ).concat(opts.transformers.afterDeclarations)
+    }
+  }
 
-	/**
-	 * Instantiate compiler to compile `.ts` files using the typescript compiler. Currently
-	 * we not resolve `.js` files and will never resolve `.tsx` or `.jsx` files.
-	 */
-	const compiler = new Compiler(appRoot, opts.cachePath!, typescript, config.options!, !!opts.cache)
-	global[symbols.compiler] = compiler
-	global[symbols.config] = config
+  /**
+   * Instantiate compiler to compile `.ts` files using the typescript compiler. Currently
+   * we not resolve `.js` files and will never resolve `.tsx` or `.jsx` files.
+   */
+  const compiler = new Compiler(appRoot, opts.cachePath!, typescript, config.options!, !!opts.cache)
+  global[symbols.compiler] = compiler
+  global[symbols.config] = config
 
-	addHook(
-		(code, filename) => {
-			return compiler.compile(filename, code)
-		},
-		{ exts: EXTS, matcher: () => true }
-	)
+  addHook(
+    (code, filename) => {
+      return compiler.compile(filename, code)
+    },
+    { exts: EXTS, matcher: () => true }
+  )
 }

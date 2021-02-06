@@ -18,64 +18,64 @@ import { getCachePathForFile, debug } from '../utils'
  * hash
  */
 export class Cache {
-	constructor(private appRoot: string, private cacheRoot: string) {}
+  constructor(private appRoot: string, private cacheRoot: string) {}
 
-	/**
-	 * Generates hash from file contents
-	 */
-	public generateHash(contents: string) {
-		return revHash(contents)
-	}
+  /**
+   * Generates hash from file contents
+   */
+  public generateHash(contents: string) {
+    return revHash(contents)
+  }
 
-	/**
-	 * Makes cache path from a given file path and its contents
-	 */
-	public makeCachePath(filePath: string, contents: string, extname: '.js' | '.json') {
-		const relativeCachePath = getCachePathForFile(this.appRoot, filePath)
-		const hash = this.generateHash(contents)
-		return join(this.cacheRoot, relativeCachePath, `${hash}${extname}`)
-	}
+  /**
+   * Makes cache path from a given file path and its contents
+   */
+  public makeCachePath(filePath: string, contents: string, extname: '.js' | '.json') {
+    const relativeCachePath = getCachePathForFile(this.appRoot, filePath)
+    const hash = this.generateHash(contents)
+    return join(this.cacheRoot, relativeCachePath, `${hash}${extname}`)
+  }
 
-	/**
-	 * Returns the file contents from the cache (if exists), otherwise
-	 * returns null
-	 */
-	public get(cachePath: string): string | null {
-		try {
-			const contents = readFileSync(cachePath, 'utf8')
-			debug('reading from cache "%s"', cachePath)
-			return contents
-		} catch (error) {
-			if (error.code === 'ENOENT') {
-				return null
-			}
-			throw error
-		}
-	}
+  /**
+   * Returns the file contents from the cache (if exists), otherwise
+   * returns null
+   */
+  public get(cachePath: string): string | null {
+    try {
+      const contents = readFileSync(cachePath, 'utf8')
+      debug('reading from cache "%s"', cachePath)
+      return contents
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        return null
+      }
+      throw error
+    }
+  }
 
-	/**
-	 * Writes file contents to the disk
-	 */
-	public set(cachePath: string, contents: string) {
-		debug('writing to cache "%s"', cachePath)
-		outputFileSync(cachePath, contents)
-	}
+  /**
+   * Writes file contents to the disk
+   */
+  public set(cachePath: string, contents: string) {
+    debug('writing to cache "%s"', cachePath)
+    outputFileSync(cachePath, contents)
+  }
 
-	/**
-	 * Clears all the generate cache for a given file
-	 */
-	public clearForFile(filePath: string) {
-		debug('clear cache for "%s"', filePath)
-		const relativeCachePath = getCachePathForFile(this.appRoot, filePath)
-		removeSync(join(this.cacheRoot, relativeCachePath))
-	}
+  /**
+   * Clears all the generate cache for a given file
+   */
+  public clearForFile(filePath: string) {
+    debug('clear cache for "%s"', filePath)
+    const relativeCachePath = getCachePathForFile(this.appRoot, filePath)
+    removeSync(join(this.cacheRoot, relativeCachePath))
+  }
 
-	/**
-	 * Clears the cache root folder
-	 */
-	public clearAll() {
-		removeSync(this.cacheRoot)
-	}
+  /**
+   * Clears the cache root folder
+   */
+  public clearAll() {
+    removeSync(this.cacheRoot)
+  }
 }
 
 /**
@@ -83,42 +83,42 @@ export class Cache {
  * when caching is disabled.
  */
 export class FakeCache {
-	constructor() {}
+  constructor() {}
 
-	/**
-	 * Generates hash from file contents
-	 */
-	public generateHash(_: string) {
-		return ''
-	}
+  /**
+   * Generates hash from file contents
+   */
+  public generateHash(_: string) {
+    return ''
+  }
 
-	/**
-	 * Makes cache path from a given file path and its contents
-	 */
-	public makeCachePath(_: string, __: string, ___: '.js' | '.json') {
-		return ''
-	}
+  /**
+   * Makes cache path from a given file path and its contents
+   */
+  public makeCachePath(_: string, __: string, ___: '.js' | '.json') {
+    return ''
+  }
 
-	/**
-	 * Returns the file contents from the cache (if exists), otherwise
-	 * returns null
-	 */
-	public get(_: string): string | null {
-		return null
-	}
+  /**
+   * Returns the file contents from the cache (if exists), otherwise
+   * returns null
+   */
+  public get(_: string): string | null {
+    return null
+  }
 
-	/**
-	 * Writes file contents to the disk
-	 */
-	public set(_: string, __: string) {}
+  /**
+   * Writes file contents to the disk
+   */
+  public set(_: string, __: string) {}
 
-	/**
-	 * Clears all the generate cache for a given file
-	 */
-	public clearForFile(_: string) {}
+  /**
+   * Clears all the generate cache for a given file
+   */
+  public clearForFile(_: string) {}
 
-	/**
-	 * Clears the cache root folder
-	 */
-	public clearAll() {}
+  /**
+   * Clears the cache root folder
+   */
+  public clearAll() {}
 }

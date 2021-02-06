@@ -19,27 +19,27 @@ export const debug = Debug('adonis:require-ts')
  * we just need to drop the directory
  */
 export function getCachePathForFile(cwd: string, location: string) {
-	const tokens = normalizePath(location.replace(cwd, '')).split('/')
-	const fileName = tokens.pop()
-	tokens.shift()
+  const tokens = normalizePath(location.replace(cwd, '')).split('/')
+  const fileName = tokens.pop()
+  tokens.shift()
 
-	if (!tokens.length) {
-		return fileName.replace(/\.\w+$/, '')
-	}
+  if (!tokens.length) {
+    return fileName.replace(/\.\w+$/, '')
+  }
 
-	return `${tokens.join('-')}-${fileName.replace(/\.\w+$/, '')}`
+  return `${tokens.join('-')}-${fileName.replace(/\.\w+$/, '')}`
 }
 
 /**
  * Loads typescript from the user project dependencies
  */
 export function loadTypescript(cwd: string) {
-	try {
-		return require(require.resolve('typescript', { paths: [cwd] }))
-	} catch (error) {
-		if (error.code === 'ENOENT') {
-			throw new Error('"@adonisjs/require-ts" expects the "typescript" to be installed')
-		}
-		throw error
-	}
+  try {
+    return require(require.resolve('typescript', { paths: [cwd] }))
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      throw new Error('"@adonisjs/require-ts" expects the "typescript" to be installed')
+    }
+    throw error
+  }
 }
