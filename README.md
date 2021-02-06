@@ -1,24 +1,3 @@
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-## Table of contents
-
-- [ Typescript Compiler ](#typescript-compiler)
-    - [
-    
-      Usage
-    
-     | 
-    
-      Contributing
-    
-     | 
-    
-      Checkout AdonisJS
-    
-  ](#usage%0A----%0A------%0A----%0A------contributing%0A----%0A------%0A----%0A------checkout-adonisjs)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
-
 <div align="center">
   <h1> Typescript Compiler </h1>
 	<p> In memory Typescript compiler for Node.js with support for <strong>caching</strong> and <strong> custom transformers</strong> </p>
@@ -28,7 +7,7 @@
 
 <div align="center">
 
-[![circleci-image]][circleci-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url] [![audit-report-image]][audit-report-url]
+[![circleci-image]][circleci-url] [![npm-image]][npm-url] ![][typescript-image] [![license-image]][license-url]
 
 </div>
 
@@ -63,7 +42,3 @@
 
 [license-image]: https://img.shields.io/npm/l/@adonisjs/require-ts?color=blueviolet&style=for-the-badge
 [license-url]: LICENSE.md "license"
-
-[audit-report-image]: https://img.shields.io/badge/-Audit%20Report-blueviolet?style=for-the-badge
-
-[audit-report-url]: https://htmlpreview.github.io/?https://github.com/adonisjs/require-ts/blob/develop/npm-audit.html 'audit-report'
