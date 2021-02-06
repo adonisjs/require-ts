@@ -1,3 +1,24 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+## Table of contents
+
+- [ Typescript Compiler ](#typescript-compiler)
+    - [
+    
+      Usage
+    
+     | 
+    
+      Contributing
+    
+     | 
+    
+      Checkout AdonisJS
+    
+  ](#usage%0A----%0A------%0A----%0A------contributing%0A----%0A------%0A----%0A------checkout-adonisjs)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 <div align="center">
   <h1> Typescript Compiler </h1>
 	<p> In memory Typescript compiler for Node.js with support for <strong>caching</strong> and <strong> custom transformers</strong> </p>
