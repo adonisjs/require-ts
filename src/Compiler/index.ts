@@ -150,11 +150,17 @@ export class Compiler {
   /**
    * Compiles the file using the typescript compiler
    */
-  private compileFile(filePath: string, contents: string) {
+  private compileFile(filePath: string, contents: string, virtualFile: boolean) {
     debug('compiling file using typescript "%s"', filePath)
+
     let { outputText, diagnostics } = this.ts.transpileModule(contents, {
       fileName: filePath,
-      compilerOptions: this.options.compilerOptions,
+      compilerOptions: virtualFile
+        ? {
+            ...this.options.compilerOptions,
+            rootDir: undefined,
+          }
+        : this.options.compilerOptions,
       reportDiagnostics: true,
       transformers: this.transformers,
     })
@@ -176,7 +182,15 @@ export class Compiler {
   /**
    * Compile typescript source code using the tsc compiler.
    */
-  public compile(filePath: string, contents: string) {
+  public compile(filePath: string, contents: string, virtualFile: boolean = false) {
+    /**
+     * Do not cache virtual files
+     */
+    if (virtualFile) {
+      debug('compiling virtual file "%s" (no cache)', filePath)
+      return this.compileFile(filePath, contents, true)
+    }
+
     debug('compiling file "%s"', filePath)
     const cachePath = this.cache.makeCachePath(filePath, contents, '.js')
 
@@ -195,7 +209,7 @@ export class Compiler {
     /**
      * Compile file using the compiler
      */
-    const outputText = this.compileFile(filePath, contents)
+    const outputText = this.compileFile(filePath, contents, false)
 
     /**
      * Write to cache on disk
