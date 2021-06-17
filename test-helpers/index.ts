@@ -23,10 +23,10 @@ export function inspectConsole() {
     return {
       stdout: stdoutOutput.output
         .map((line) => stripAnsi(line))
-        .filter((line) => !line.trim().startsWith('adonis:require-ts')),
+        .filter((line) => !line.trim().includes('adonis:require-ts')),
       stderr: stderrOutput.output
         .map((line) => stripAnsi(line))
-        .filter((line) => !line.trim().startsWith('adonis:require-ts')),
+        .filter((line) => !line.trim().includes('adonis:require-ts')),
     }
   }
 }
