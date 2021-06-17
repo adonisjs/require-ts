@@ -5,7 +5,7 @@
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "pretest": "npm run lint",
-    "test": "FORCE_COLOR=true node japaFile.js",
+    "test": "cross-env FORCE_COLOR=true node japaFile.js",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "build": "npm run compile",
@@ -31,6 +31,7 @@
     "@types/node": "^15.12.2",
     "@types/source-map-support": "^0.5.3",
     "benchmark": "^2.1.4",
+    "cross-env": "^7.0.3",
     "del-cli": "^4.0.0",
     "eslint": "^7.28.0",
     "eslint-config-prettier": "^8.3.0",
