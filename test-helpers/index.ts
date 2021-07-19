@@ -7,11 +7,21 @@
  * file that was distributed with this source code.
  */
 
-import stripAnsi from 'strip-ansi'
 import testConsole from 'test-console'
 
 export function stringToArray(value: string) {
   return value.split('\n').map((line) => line.trim())
+}
+
+/**
+ * Strip ANSI escape codes
+ */
+function stripAnsi(value: string) {
+  const pattern = [
+    '[\\u001B\\u009B][[\\]()#;?]*(?:(?:(?:[a-zA-Z\\d]*(?:;[-a-zA-Z\\d\\/#&.:=?%@~_]*)*)?\\u0007)',
+    '(?:(?:\\d{1,4}(?:;\\d{0,4})*)?[\\dA-PR-TZcf-ntqry=><~]))',
+  ].join('|')
+  return value.replace(RegExp(pattern, 'g'), '')
 }
 
 export function inspectConsole() {

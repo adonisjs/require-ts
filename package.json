@@ -43,7 +43,6 @@
     "mrm": "^3.0.2",
     "np": "^7.5.0",
     "prettier": "^2.3.2",
-    "strip-ansi": "^6.0.0",
     "test-console": "^2.0.0",
     "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
