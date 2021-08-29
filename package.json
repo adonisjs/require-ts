@@ -1,6 +1,6 @@
 {
   "name": "@adonisjs/require-ts",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "In memory typescript compiler",
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
