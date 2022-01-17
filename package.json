@@ -5,7 +5,7 @@
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "pretest": "npm run lint",
-    "test": "node .bin/test.js",
+    "test": "cross-env FORCE_COLOR=true node .bin/test.js",
     "clean": "del build",
     "compile": "npm run lint && npm run clean && tsc",
     "build": "npm run compile",
@@ -27,7 +27,6 @@
   "license": "MIT",
   "devDependencies": {
     "@adonisjs/mrm-preset": "^5.0.2",
-    "@adonisjs/require-ts": "^2.0.8",
     "@poppinss/dev-utils": "^2.0.1",
     "@types/node": "^17.0.8",
     "@types/source-map-support": "^0.5.4",
