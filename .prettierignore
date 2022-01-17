@@ -5,3 +5,4 @@ config.json
 package.json
 *.html
 *.txt
+*.md
