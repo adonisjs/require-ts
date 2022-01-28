@@ -81,7 +81,7 @@
     "fs-extra": "^10.0.0",
     "normalize-path": "^3.0.0",
     "pirates": "^4.0.4",
-    "rev-hash": "^3.0.0",
+    "rev-hash": "^4.0.0",
     "source-map-support": "^0.5.21"
   },
   "directories": {
