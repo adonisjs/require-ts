@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import ts from 'typescript'
 import revHash from 'rev-hash'
@@ -19,11 +19,11 @@ import { stringToArray, inspectConsole } from '../test-helpers'
 const fs = new Filesystem(join(__dirname, 'app'))
 
 test.group('Compiler', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('parse typescript source and return back the compiled contents', async (assert) => {
+  test('parse typescript source and return back the compiled contents', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const cacheRoot = join(fs.basePath, 'cache')
 
@@ -53,7 +53,7 @@ test.group('Compiler', (group) => {
     )
   })
 
-  test('cache file contents on disk', async (assert) => {
+  test('cache file contents on disk', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = `
@@ -77,7 +77,7 @@ test.group('Compiler', (group) => {
     assert.deepEqual(stringToArray(output), stringToArray(cachedContents))
   })
 
-  test('do not re-compile file when already exists in cache', async (assert) => {
+  test('do not re-compile file when already exists in cache', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = `
@@ -102,7 +102,7 @@ test.group('Compiler', (group) => {
     assert.deepEqual(stringToArray(output), stringToArray('hello'))
   })
 
-  test('do not cache when caching is disabled', async (assert) => {
+  test('do not cache when caching is disabled', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = `
@@ -141,7 +141,7 @@ test.group('Compiler', (group) => {
     )
   })
 
-  test('apply transformers', async (assert) => {
+  test('apply transformers', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const cacheRoot = join(fs.basePath, 'cache')
 
@@ -197,7 +197,7 @@ test.group('Compiler', (group) => {
     )
   })
 
-  test('complain when rootDir is defined is file is not marked as virtual', async (assert) => {
+  test('complain when rootDir is defined is file is not marked as virtual', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const cacheRoot = join(fs.basePath, 'cache')
 
@@ -231,7 +231,7 @@ test.group('Compiler', (group) => {
     )
   })
 
-  test('work fine when rootDir is defined is file is marked as virtual', async (assert) => {
+  test('work fine when rootDir is defined is file is marked as virtual', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const cacheRoot = join(fs.basePath, 'cache')
 

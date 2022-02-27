@@ -7,12 +7,12 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import { getCachePathForFile } from '../src/utils'
 
 test.group('getCachePathForFile', () => {
-  test('get cache root name for a given file', (assert) => {
+  test('get cache root name for a given file', ({ assert }) => {
     const cwd = join(__dirname, 'app')
     const fileName = join(cwd, 'server.ts')
 
@@ -20,7 +20,7 @@ test.group('getCachePathForFile', () => {
     assert.equal(cacheRoot, 'server')
   })
 
-  test('get cache root name for a nested path', (assert) => {
+  test('get cache root name for a nested path', ({ assert }) => {
     const cwd = join(__dirname, 'app')
     const fileName = join(cwd, 'start/routes.ts')
 
@@ -28,7 +28,7 @@ test.group('getCachePathForFile', () => {
     assert.equal(cacheRoot, 'start-routes')
   })
 
-  test('get cache root name for deep nested path', (assert) => {
+  test('get cache root name for deep nested path', ({ assert }) => {
     const cwd = join(__dirname, 'app')
     const fileName = join(cwd, 'app/Controllers/Http/HomeController.ts')
 
@@ -36,7 +36,7 @@ test.group('getCachePathForFile', () => {
     assert.equal(cacheRoot, 'app-Controllers-Http-HomeController')
   })
 
-  test('handle files without extension', (assert) => {
+  test('handle files without extension', ({ assert }) => {
     const cwd = join(__dirname, 'app')
     const fileName = join(cwd, 'app/Controllers/Http/HomeController')
 
