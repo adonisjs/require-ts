@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import revHash from 'rev-hash'
 import { Filesystem } from '@poppinss/dev-utils'
@@ -17,11 +17,11 @@ import { Cache } from '../src/Cache'
 const fs = new Filesystem(join(__dirname, 'app'))
 
 test.group('Cache', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('make path to the cache file', (assert) => {
+  test('make path to the cache file', ({ assert }) => {
     const cwd = join(__dirname, '..')
     const fileName = join(cwd, 'server.ts')
     const cache = new Cache(cwd, fs.basePath)
@@ -30,7 +30,7 @@ test.group('Cache', (group) => {
     assert.equal(fileCachePath, join(fs.basePath, 'server', `${revHash('hello-world')}.js`))
   })
 
-  test('get file contents from the cache', async (assert) => {
+  test('get file contents from the cache', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const fileName = join(cwd, 'server.ts')
     const cache = new Cache(cwd, fs.basePath)
@@ -42,7 +42,7 @@ test.group('Cache', (group) => {
     assert.equal(cache.get(fileCachePath), 'hello-world')
   })
 
-  test("return null when cache file doesn't exists", async (assert) => {
+  test("return null when cache file doesn't exists", async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const fileName = join(cwd, 'server.ts')
     const cache = new Cache(cwd, fs.basePath)
@@ -51,7 +51,7 @@ test.group('Cache', (group) => {
     assert.isNull(cache.get(fileCachePath))
   })
 
-  test('write cache files', async (assert) => {
+  test('write cache files', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const fileName = join(cwd, 'server.ts')
     const cache = new Cache(cwd, fs.basePath)
@@ -83,7 +83,7 @@ test.group('Cache', (group) => {
     )
   })
 
-  test('write all cache files', async (assert) => {
+  test('write all cache files', async ({ assert }) => {
     const cwd = join(__dirname, '..')
     const fileName = join(cwd, 'server.ts')
     const cache = new Cache(cwd, fs.basePath)

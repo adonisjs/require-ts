@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-import test from 'japa'
+import { test } from '@japa/runner'
 import { join } from 'path'
 import ts from 'typescript'
 import revisionHash from 'rev-hash'
@@ -18,11 +18,11 @@ import { Config } from '../src/Config'
 const fs = new Filesystem(join(__dirname, 'app'))
 
 test.group('Config', (group) => {
-  group.afterEach(async () => {
+  group.each.teardown(async () => {
     await fs.cleanup()
   })
 
-  test('parse tsconfig and return compiler options back', async (assert) => {
+  test('parse tsconfig and return compiler options back', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = JSON.stringify({
@@ -40,7 +40,7 @@ test.group('Config', (group) => {
     assert.property(options.options?.compilerOptions, 'configFilePath')
   })
 
-  test('write compiled file to cache', async (assert) => {
+  test('write compiled file to cache', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = JSON.stringify({
@@ -61,7 +61,7 @@ test.group('Config', (group) => {
     assert.property(options.options?.compilerOptions, 'configFilePath')
   })
 
-  test('do not write to cache when caching is disabled', async (assert) => {
+  test('do not write to cache when caching is disabled', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = JSON.stringify({
@@ -82,19 +82,19 @@ test.group('Config', (group) => {
     assert.property(options.options?.compilerOptions, 'configFilePath')
   })
 
-  test('return error when tsconfig file is missing', async (assert) => {
+  test('return error when tsconfig file is missing', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
 
     const config = new Config(cwd, cacheRoot, ts)
     const options = () => config.parse()
-    assert.throw(
+    assert.throws(
       options,
       '"@adonisjs/require-ts" expects the "tsconfig.json" file to exists in the app root'
     )
   })
 
-  test('return error when tsconfig file is invalid', async (assert) => {
+  test('return error when tsconfig file is invalid', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = JSON.stringify({
@@ -117,7 +117,7 @@ test.group('Config', (group) => {
     )
   })
 
-  test('read from cache when exists', async (assert) => {
+  test('read from cache when exists', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = JSON.stringify({
@@ -150,7 +150,7 @@ test.group('Config', (group) => {
     })
   })
 
-  test('do not read from cache when caching is disabled', async (assert) => {
+  test('do not read from cache when caching is disabled', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = JSON.stringify({
@@ -180,7 +180,7 @@ test.group('Config', (group) => {
     assert.notProperty(options.options?.compilerOptions, 'dummyValue')
   })
 
-  test('do not read from cache during version mis-match', async (assert) => {
+  test('do not read from cache during version mis-match', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = JSON.stringify({
@@ -210,7 +210,7 @@ test.group('Config', (group) => {
     assert.notProperty(options.options?.compilerOptions, 'dummyValue')
   })
 
-  test('do not read from cache during when file contents has changed', async (assert) => {
+  test('do not read from cache during when file contents has changed', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
     const contents = JSON.stringify({
@@ -245,7 +245,7 @@ test.group('Config', (group) => {
     assert.notProperty(options.options?.compilerOptions, 'dummyValue')
   })
 
-  test('fetch transformers from the raw config file', async (assert) => {
+  test('fetch transformers from the raw config file', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
 
@@ -270,7 +270,7 @@ test.group('Config', (group) => {
     })
   })
 
-  test('cache transformers', async (assert) => {
+  test('cache transformers', async ({ assert }) => {
     const cwd = fs.basePath
     const cacheRoot = join(fs.basePath, 'cache')
 
