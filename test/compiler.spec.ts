@@ -159,10 +159,10 @@ test.group('Compiler', (group) => {
                 && node.expression.escapedText === 'require'
               ) {
                 const moduleName = node.arguments[0].text
-                return ts.createCall(
-                  ts.createIdentifier('ioc.use'),
+                return ts.factory.createCallExpression(
+                  ts.factory.createIdentifier('ioc.use'),
                   undefined,
-                  [ts.createStringLiteral(moduleName)],
+                  [ts.factory.createStringLiteral(moduleName)],
                 )
               }
               return ts.visitEachChild(node, visitor, ctx)
