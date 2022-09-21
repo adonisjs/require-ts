@@ -161,7 +161,7 @@ export class Compiler {
             rootDir: undefined,
           }
         : this.options.compilerOptions,
-      reportDiagnostics: true,
+      reportDiagnostics: !virtualFile,
       transformers: this.transformers,
     })
 
